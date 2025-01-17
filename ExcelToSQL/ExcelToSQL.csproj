@@ -9,6 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CsvHelper" Version="33.0.1" />
+    <PackageReference Include="EPPlus" Version="7.5.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="Resources\Resources.es.Designer.cs">
       <DependentUpon>Resources.es.resx</DependentUpon>
       <DesignTime>True</DesignTime>
