@@ -117,11 +117,29 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="CreateTable" xml:space="preserve">
+    <value>Create Table</value>
+  </data>
+  <data name="Delimiter" xml:space="preserve">
+    <value>Delimiter:</value>
+  </data>
+  <data name="DelimiterWarning" xml:space="preserve">
+    <value>Could not autodetect the delimiter. Please select one manually.</value>
+  </data>
   <data name="DragFileHere" xml:space="preserve">
     <value>Drag File Here</value>
   </data>
   <data name="GenerateSQL" xml:space="preserve">
     <value>Generate SQL</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Language:</value>
+  </data>
+  <data name="NoSheetSelected" xml:space="preserve">
+    <value>No sheet selected. Operation cancelled.</value>
+  </data>
+  <data name="Operation" xml:space="preserve">
+    <value>Operation:</value>
   </data>
   <data name="OperationCreate" xml:space="preserve">
     <value>Create Table</value>
@@ -131,6 +149,21 @@
   </data>
   <data name="SaveSettings" xml:space="preserve">
     <value>Save Settings</value>
+  </data>
+  <data name="SelectSheet" xml:space="preserve">
+    <value>Select a sheet to process:</value>
+  </data>
+  <data name="SelectSheetTitle" xml:space="preserve">
+    <value>Select a Sheet</value>
+  </data>
+  <data name="TargetSQL" xml:space="preserve">
+    <value>Target SQL:</value>
+  </data>
+  <data name="UnsupportedFile" xml:space="preserve">
+    <value>Unsupported file format. Please upload a CSV or Excel file.</value>
+  </data>
+  <data name="UpdateTable" xml:space="preserve">
+    <value>Update Table</value>
   </data>
   <data name="UploadFile" xml:space="preserve">
     <value>Upload File</value>

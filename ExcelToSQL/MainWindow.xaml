@@ -32,8 +32,8 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Drag-and-Drop Zone -->
-                <Border BorderBrush="Gray" BorderThickness="2" CornerRadius="10" AllowDrop="True" Grid.Column="0"
-                    DragEnter="Border_DragEnter" Drop="Border_Drop" MinWidth="150" Width="Auto" Height="Auto" Margin="5">
+                <Border BorderBrush="Gray" BorderThickness="2" CornerRadius="10" AllowDrop="True" Grid.Column="0" Background="#00FFFFFF"
+                    DragEnter="Border_DragEnter" Drop="Border_Drop" MinWidth="150" Width="Auto" MinHeight="80" Height="Auto" Margin="5">
                     <TextBlock x:Name="DragFileText" Text="Drag File Here" VerticalAlignment="Center" HorizontalAlignment="Center" />
                 </Border>
 
@@ -43,7 +43,7 @@
                 <StackPanel Grid.Column="2">
                     <!-- ComboBox for Delimiter -->
                     <StackPanel Orientation="Vertical" VerticalAlignment="Center">
-                        <TextBlock Text="Delimiter:" FontWeight="Bold" Margin="0,0,0,5" />
+                        <TextBlock x:Name="DelimiterText" Text="Delimiter:" FontWeight="Bold" Margin="0,0,0,5" />
                         <ComboBox x:Name="DelimiterComboBox" MinWidth="120" Width="Auto" SelectionChanged="DelimiterComboBox_SelectionChanged" Margin="5">
                             <ComboBoxItem Content="Auto" IsSelected="True" Tag="" />
                             <ComboBoxItem Content="Comma (,)" Tag="," />
@@ -55,10 +55,10 @@
 
                     <!-- ComboBox for Create/Update Table -->
                     <StackPanel Orientation="Vertical" VerticalAlignment="Center">
-                        <TextBlock Text="Operation:" FontWeight="Bold" Margin="0,0,0,5" />
+                        <TextBlock x:Name="OperationText" Text="Operation:" FontWeight="Bold" Margin="0,0,0,5" />
                         <ComboBox x:Name="OperationComboBox" MinWidth="120" Width="Auto" SelectionChanged="OperationComboBox_SelectionChanged" Margin="5">
-                            <ComboBoxItem Content="Create Table" IsSelected="True" />
-                            <ComboBoxItem Content="Update Table" />
+                            <ComboBoxItem x:Name="CreateTableOption" Content="Create Table" IsSelected="True" />
+                            <ComboBoxItem x:Name="UpdateTableOption" Content="Update Table" />
                         </ComboBox>
                     </StackPanel>
                 </StackPanel>
@@ -70,7 +70,7 @@
                 <StackPanel Grid.Column="3">
 
                     <StackPanel Orientation="Vertical" VerticalAlignment="Center">
-                        <TextBlock Text="Target SQL:" FontWeight="Bold" Margin="0,0,0,5" />
+                        <TextBlock x:Name="TargetSQLText" Text="Target SQL:" FontWeight="Bold" Margin="0,0,0,5" />
                         <ComboBox x:Name="TargetSQLComboBox" MinWidth="120" Width="Auto" SelectionChanged="TargetSQLComboBox_SelectionChanged" Margin="5">
                             <ComboBoxItem Content="MSSQL" IsSelected="True" Tag="MSSQL" />
                             <ComboBoxItem Content="MySQL" Tag="MySQL" />
@@ -80,7 +80,7 @@
 
                     <!-- Language Selector -->
                     <StackPanel Orientation="Vertical" VerticalAlignment="Center">
-                        <TextBlock Text="Language:" FontWeight="Bold" Margin="0,0,0,5" />
+                        <TextBlock x:Name="LanguageText" Text="Language:" FontWeight="Bold" Margin="0,0,0,5" />
                         <ComboBox x:Name="LanguageSelector" SelectionChanged="LanguageSelector_SelectionChanged" MinWidth="120" Width="Auto" Margin="5">
                             <ComboBoxItem Tag="en" Content="English" IsSelected="True" />
                             <ComboBoxItem Tag="es" Content="Español" />

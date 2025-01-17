@@ -61,6 +61,33 @@ namespace ExcelToSQL.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Create Table.
+        /// </summary>
+        internal static string CreateTable {
+            get {
+                return ResourceManager.GetString("CreateTable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delimiter:.
+        /// </summary>
+        internal static string Delimiter {
+            get {
+                return ResourceManager.GetString("Delimiter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not autodetect the delimiter. Please select one manually..
+        /// </summary>
+        internal static string DelimiterWarning {
+            get {
+                return ResourceManager.GetString("DelimiterWarning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Drag File Here.
         /// </summary>
         internal static string DragFileHere {
@@ -75,6 +102,33 @@ namespace ExcelToSQL.Resources {
         internal static string GenerateSQL {
             get {
                 return ResourceManager.GetString("GenerateSQL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Language:.
+        /// </summary>
+        internal static string Language {
+            get {
+                return ResourceManager.GetString("Language", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No sheet selected. Operation cancelled..
+        /// </summary>
+        internal static string NoSheetSelected {
+            get {
+                return ResourceManager.GetString("NoSheetSelected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Operation:.
+        /// </summary>
+        internal static string Operation {
+            get {
+                return ResourceManager.GetString("Operation", resourceCulture);
             }
         }
         
@@ -102,6 +156,51 @@ namespace ExcelToSQL.Resources {
         internal static string SaveSettings {
             get {
                 return ResourceManager.GetString("SaveSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select a sheet to process:.
+        /// </summary>
+        internal static string SelectSheet {
+            get {
+                return ResourceManager.GetString("SelectSheet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select a Sheet.
+        /// </summary>
+        internal static string SelectSheetTitle {
+            get {
+                return ResourceManager.GetString("SelectSheetTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Target SQL:.
+        /// </summary>
+        internal static string TargetSQL {
+            get {
+                return ResourceManager.GetString("TargetSQL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unsupported file format. Please upload a CSV or Excel file..
+        /// </summary>
+        internal static string UnsupportedFile {
+            get {
+                return ResourceManager.GetString("UnsupportedFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Table.
+        /// </summary>
+        internal static string UpdateTable {
+            get {
+                return ResourceManager.GetString("UpdateTable", resourceCulture);
             }
         }
         

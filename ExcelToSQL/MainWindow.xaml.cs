@@ -1,14 +1,11 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 using System.IO;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using CsvHelper;
 using OfficeOpenXml;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 
 namespace ExcelToSQL
 {
@@ -17,6 +14,12 @@ namespace ExcelToSQL
         private const string ConfigFilePath = "C:\\ProgramData\\FloatyRock\\ExcelToSQL\\settings.json";
         private string selectedSQLType = "MSSQL"; // Default to MSSQL
         private string CurrentFilePath; // To store the path of the loaded file
+
+        private string DelimiterWarningText { get; set; }
+        private string NoSheetSelectedText { get; set; }
+        private string UnsupportedFileText { get; set; }
+        private string SelectSheetText { get; set; }
+        private string SelectSheetTitle { get; set; }
 
 
         public MainWindow()
@@ -125,7 +128,7 @@ namespace ExcelToSQL
 
                     if (string.IsNullOrEmpty(delimiter))
                     {
-                        MessageBox.Show("Could not autodetect the delimiter. Please select one manually.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        MessageBox.Show(DelimiterWarningText, "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                         return;
                     }
 
@@ -152,7 +155,7 @@ namespace ExcelToSQL
                         string selectedSheet = SelectSheet(sheetNames);
                         if (string.IsNullOrEmpty(selectedSheet))
                         {
-                            MessageBox.Show("No sheet selected. Operation cancelled.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                            MessageBox.Show(NoSheetSelectedText, "Info", MessageBoxButton.OK, MessageBoxImage.Information);
                             return;
                         }
 
@@ -196,7 +199,7 @@ namespace ExcelToSQL
                 }
                 else
                 {
-                    MessageBox.Show("Unsupported file format. Please upload a CSV or Excel file.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(UnsupportedFileText, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             catch (Exception ex)
@@ -214,7 +217,7 @@ namespace ExcelToSQL
         {
             var sheetSelectionWindow = new Window
             {
-                Title = "Select a Sheet",
+                Title = SelectSheetTitle,
                 Width = 300,
                 Height = 200,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner
@@ -228,7 +231,7 @@ namespace ExcelToSQL
             var okButton = new Button { Content = "OK", Width = 80, HorizontalAlignment = HorizontalAlignment.Center };
             okButton.Click += (s, e) => sheetSelectionWindow.DialogResult = true;
 
-            stackPanel.Children.Add(new TextBlock { Text = "Select a sheet to process:", Margin = new Thickness(0, 0, 0, 10) });
+            stackPanel.Children.Add(new TextBlock { Text = SelectSheetText, Margin = new Thickness(0, 0, 0, 10) });
             stackPanel.Children.Add(comboBox);
             stackPanel.Children.Add(okButton);
 
@@ -607,6 +610,18 @@ namespace ExcelToSQL
             DragFileText.Text = LocalizationManager.GetString("DragFileHere");
             UploadButton.Content = LocalizationManager.GetString("UploadFile");
             GenerateSQLButton.Content = LocalizationManager.GetString("GenerateSQL");
+            DelimiterText.Text = LocalizationManager.GetString("Delimiter");
+            OperationText.Text = LocalizationManager.GetString("Operation");
+            LanguageText.Text = LocalizationManager.GetString("Language");
+            TargetSQLText.Text = LocalizationManager.GetString("TargetSQL");
+            UpdateTableOption.Content = LocalizationManager.GetString("UpdateTable");
+            CreateTableOption.Content = LocalizationManager.GetString("CreateTable");
+            DelimiterWarningText = LocalizationManager.GetString("DelimiterWarning");
+            NoSheetSelectedText = LocalizationManager.GetString("NoSheetSelected");
+            UnsupportedFileText = LocalizationManager.GetString("UnsupportedFile");
+            SelectSheetText = LocalizationManager.GetString("SelectSheet");
+            SelectSheetTitle = LocalizationManager.GetString("SelectSheetTitle");
+
         }
     }
 

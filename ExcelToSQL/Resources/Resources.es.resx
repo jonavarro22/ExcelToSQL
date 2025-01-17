@@ -117,11 +117,29 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="CreateTable" xml:space="preserve">
+    <value>Crear Tabla</value>
+  </data>
+  <data name="Delimiter" xml:space="preserve">
+    <value>Delimitador:</value>
+  </data>
+  <data name="DelimiterWarning" xml:space="preserve">
+    <value>No se pudo detectar automáticamente el delimitador. Por favor, selecciónelo manualmente.</value>
+  </data>
   <data name="DragFileHere" xml:space="preserve">
     <value> Arrastra el archivo aquí</value>
   </data>
   <data name="GenerateSQL" xml:space="preserve">
     <value>Generar SQL</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Lenguaje:</value>
+  </data>
+  <data name="NoSheetSelected" xml:space="preserve">
+    <value>No se seleccionó ninguna hoja. Operación cancelada.</value>
+  </data>
+  <data name="Operation" xml:space="preserve">
+    <value>Operación:</value>
   </data>
   <data name="OperationCreate" xml:space="preserve">
     <value>Crear tabla</value>
@@ -131,6 +149,21 @@
   </data>
   <data name="SaveSettings" xml:space="preserve">
     <value>Guardar configuración</value>
+  </data>
+  <data name="SelectSheet" xml:space="preserve">
+    <value>Seleccione una hoja para procesar:</value>
+  </data>
+  <data name="SelectSheetTitle" xml:space="preserve">
+    <value>Seleccione una Hoja</value>
+  </data>
+  <data name="TargetSQL" xml:space="preserve">
+    <value>SQL Objetivo:</value>
+  </data>
+  <data name="UnsupportedFile" xml:space="preserve">
+    <value>Formato de archivo no compatible. Por favor, suba un archivo CSV o Excel.</value>
+  </data>
+  <data name="UpdateTable" xml:space="preserve">
+    <value>Actualizar Tabla</value>
   </data>
   <data name="UploadFile" xml:space="preserve">
     <value>Subir archivo</value>
