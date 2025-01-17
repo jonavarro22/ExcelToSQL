@@ -117,11 +117,20 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AllSupportedFiles" xml:space="preserve">
+    <value>Todos los archivos compatibles</value>
+  </data>
+  <data name="CantLoadSettings" xml:space="preserve">
+    <value>No se pudieron cargar las configuraciones del usuario. Se utilizarán los valores predeterminados.</value>
+  </data>
   <data name="CreateTable" xml:space="preserve">
     <value>Crear Tabla</value>
   </data>
   <data name="Delimiter" xml:space="preserve">
     <value>Delimitador:</value>
+  </data>
+  <data name="DelimiterAuto" xml:space="preserve">
+    <value>Delimitador establecido en Automático. La aplicación intentará detectarlo.</value>
   </data>
   <data name="DelimiterWarning" xml:space="preserve">
     <value>No se pudo detectar automáticamente el delimitador. Por favor, selecciónelo manualmente.</value>
@@ -129,11 +138,23 @@
   <data name="DragFileHere" xml:space="preserve">
     <value> Arrastra el archivo aquí</value>
   </data>
+  <data name="ErrorGeneratingSQL" xml:space="preserve">
+    <value>Error al generar SQL: </value>
+  </data>
+  <data name="ErrorLoadingfile" xml:space="preserve">
+    <value>Error al cargar el archivo: </value>
+  </data>
+  <data name="ErrorSavingFile" xml:space="preserve">
+    <value>Error al guardar el archivo: </value>
+  </data>
   <data name="GenerateSQL" xml:space="preserve">
     <value>Generar SQL</value>
   </data>
   <data name="Language" xml:space="preserve">
     <value>Lenguaje:</value>
+  </data>
+  <data name="NoDataLoadedError" xml:space="preserve">
+    <value>No se han cargado datos. Por favor, suba o arrastre un archivo.</value>
   </data>
   <data name="NoSheetSelected" xml:space="preserve">
     <value>No se seleccionó ninguna hoja. Operación cancelada.</value>
@@ -147,14 +168,23 @@
   <data name="OperationUpdate" xml:space="preserve">
     <value>Actualizar tabla</value>
   </data>
+  <data name="SaveOperationCancelled" xml:space="preserve">
+    <value>Operación de guardado cancelada.</value>
+  </data>
   <data name="SaveSettings" xml:space="preserve">
     <value>Guardar configuración</value>
+  </data>
+  <data name="SaveSQLFileTitle" xml:space="preserve">
+    <value>Guardar archivo SQL</value>
   </data>
   <data name="SelectSheet" xml:space="preserve">
     <value>Seleccione una hoja para procesar:</value>
   </data>
   <data name="SelectSheetTitle" xml:space="preserve">
     <value>Seleccione una Hoja</value>
+  </data>
+  <data name="SQLFileSaved" xml:space="preserve">
+    <value>Archivo SQL guardado: </value>
   </data>
   <data name="TargetSQL" xml:space="preserve">
     <value>SQL Objetivo:</value>

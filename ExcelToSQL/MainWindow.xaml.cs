@@ -20,6 +20,16 @@ namespace ExcelToSQL
         private string UnsupportedFileText { get; set; }
         private string SelectSheetText { get; set; }
         private string SelectSheetTitle { get; set; }
+        private string AllSupportedFilesText { get; set; }
+        private string ErrorLoadingFileText { get; set; }
+        private string DelimiterAutoText { get; set; }
+        private string NoDataLoadedErrorText { get; set; }
+        private string ErrorGeneratingSQLText { get; set; }
+        private string SQLFileSavedText { get; set; }
+        private string ErrorSavingFileText { get; set; }
+        private string SaveOperationCancelledText { get; set; }
+        private string CantLoadSettingsText { get; set; }
+        private string SaveSQLFileTitle { get; set; }
 
 
         public MainWindow()
@@ -103,7 +113,7 @@ namespace ExcelToSQL
         {
             Microsoft.Win32.OpenFileDialog openFileDialog = new Microsoft.Win32.OpenFileDialog
             {
-                Filter = "All Supported Files (*.xlsx, *.csv)|*.xlsx;*.csv|Excel Files (*.xlsx)|*.xlsx|CSV Files (*.csv)|*.csv"
+                Filter = AllSupportedFilesText + " (*.xlsx, *.csv)|*.xlsx;*.csv|Excel (*.xlsx)|*.xlsx|CSV (*.csv)|*.csv"
             };
             if (openFileDialog.ShowDialog() == true)
             {
@@ -204,7 +214,7 @@ namespace ExcelToSQL
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(ErrorLoadingFileText + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -395,7 +405,7 @@ namespace ExcelToSQL
                     // Notify the user if needed
                     if (selectedDelimiter == "")
                     {
-                        MessageBox.Show("Delimiter set to Auto. The application will attempt to detect it.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBox.Show(DelimiterAutoText, "Info", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                 }
             }
@@ -500,7 +510,7 @@ namespace ExcelToSQL
         {
             if (DataPreviewGrid.ItemsSource is null)
             {
-                MessageBox.Show("No data loaded. Please upload or drag a file.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(NoDataLoadedErrorText, "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -515,7 +525,7 @@ namespace ExcelToSQL
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error generating SQL: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(ErrorGeneratingSQLText + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -526,8 +536,8 @@ namespace ExcelToSQL
         {
             var saveFileDialog = new Microsoft.Win32.SaveFileDialog
             {
-                Title = "Save SQL File",
-                Filter = "SQL Files (*.sql)|*.sql",
+                Title = SaveSQLFileTitle,
+                Filter = "SQL (*.sql)|*.sql",
                 FileName = $"{defaultFileName}.sql", // Default file name
                 DefaultExt = ".sql",                // Default file extension
                 InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) // Default save location
@@ -539,16 +549,16 @@ namespace ExcelToSQL
                 try
                 {
                     File.WriteAllText(saveFileDialog.FileName, sql);
-                    MessageBox.Show($"SQL file saved: {saveFileDialog.FileName}", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show(SQLFileSavedText + saveFileDialog.FileName, "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error saving file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(ErrorSavingFileText + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             else
             {
-                MessageBox.Show("Save operation cancelled.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(SaveOperationCancelledText, "Info", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
@@ -577,7 +587,7 @@ namespace ExcelToSQL
                 }
                 catch
                 {
-                    MessageBox.Show("Could not load user settings. Defaults will be used.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show(CantLoadSettingsText, "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
         }
@@ -621,6 +631,16 @@ namespace ExcelToSQL
             UnsupportedFileText = LocalizationManager.GetString("UnsupportedFile");
             SelectSheetText = LocalizationManager.GetString("SelectSheet");
             SelectSheetTitle = LocalizationManager.GetString("SelectSheetTitle");
+            AllSupportedFilesText = LocalizationManager.GetString("AllSupportedFiles");
+            ErrorLoadingFileText = LocalizationManager.GetString("ErrorLoadingFile");
+            DelimiterAutoText = LocalizationManager.GetString("DelimiterAuto");
+            NoDataLoadedErrorText = LocalizationManager.GetString("NoDataLoadedError");
+            ErrorGeneratingSQLText = LocalizationManager.GetString("ErrorGeneratingSQL");
+            SQLFileSavedText = LocalizationManager.GetString("SQLFileSaved");
+            ErrorSavingFileText = LocalizationManager.GetString("ErrorSavingFile");
+            SaveOperationCancelledText = LocalizationManager.GetString("SaveOperationCancelled");
+            CantLoadSettingsText = LocalizationManager.GetString("CantLoadSettings");
+            SaveSQLFileTitle = LocalizationManager.GetString("SaveSQLFileTitle");
 
         }
     }

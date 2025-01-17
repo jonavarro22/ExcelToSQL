@@ -117,11 +117,20 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AllSupportedFiles" xml:space="preserve">
+    <value>All Supported Files</value>
+  </data>
+  <data name="CantLoadSettings" xml:space="preserve">
+    <value>Could not load user settings. Defaults will be used.</value>
+  </data>
   <data name="CreateTable" xml:space="preserve">
     <value>Create Table</value>
   </data>
   <data name="Delimiter" xml:space="preserve">
     <value>Delimiter:</value>
+  </data>
+  <data name="DelimiterAuto" xml:space="preserve">
+    <value>Delimiter set to Auto. The application will attempt to detect it.</value>
   </data>
   <data name="DelimiterWarning" xml:space="preserve">
     <value>Could not autodetect the delimiter. Please select one manually.</value>
@@ -129,11 +138,23 @@
   <data name="DragFileHere" xml:space="preserve">
     <value>Drag File Here</value>
   </data>
+  <data name="ErrorGeneratingSQL" xml:space="preserve">
+    <value>Error generating SQL: </value>
+  </data>
+  <data name="ErrorLoadingfile" xml:space="preserve">
+    <value>Error loading file: </value>
+  </data>
+  <data name="ErrorSavingFile" xml:space="preserve">
+    <value>Error saving file: </value>
+  </data>
   <data name="GenerateSQL" xml:space="preserve">
     <value>Generate SQL</value>
   </data>
   <data name="Language" xml:space="preserve">
     <value>Language:</value>
+  </data>
+  <data name="NoDataLoadedError" xml:space="preserve">
+    <value>No data loaded. Please upload or drag a file.</value>
   </data>
   <data name="NoSheetSelected" xml:space="preserve">
     <value>No sheet selected. Operation cancelled.</value>
@@ -147,14 +168,23 @@
   <data name="OperationUpdate" xml:space="preserve">
     <value>Update Table</value>
   </data>
+  <data name="SaveOperationCancelled" xml:space="preserve">
+    <value>Save operation cancelled.</value>
+  </data>
   <data name="SaveSettings" xml:space="preserve">
     <value>Save Settings</value>
+  </data>
+  <data name="SaveSQLFileTitle" xml:space="preserve">
+    <value>Save SQL File</value>
   </data>
   <data name="SelectSheet" xml:space="preserve">
     <value>Select a sheet to process:</value>
   </data>
   <data name="SelectSheetTitle" xml:space="preserve">
     <value>Select a Sheet</value>
+  </data>
+  <data name="SQLFileSaved" xml:space="preserve">
+    <value>SQL file saved: </value>
   </data>
   <data name="TargetSQL" xml:space="preserve">
     <value>Target SQL:</value>

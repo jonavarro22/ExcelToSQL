@@ -61,6 +61,24 @@ namespace ExcelToSQL.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to All Supported Files.
+        /// </summary>
+        internal static string AllSupportedFiles {
+            get {
+                return ResourceManager.GetString("AllSupportedFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not load user settings. Defaults will be used..
+        /// </summary>
+        internal static string CantLoadSettings {
+            get {
+                return ResourceManager.GetString("CantLoadSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Create Table.
         /// </summary>
         internal static string CreateTable {
@@ -75,6 +93,15 @@ namespace ExcelToSQL.Resources {
         internal static string Delimiter {
             get {
                 return ResourceManager.GetString("Delimiter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delimiter set to Auto. The application will attempt to detect it..
+        /// </summary>
+        internal static string DelimiterAuto {
+            get {
+                return ResourceManager.GetString("DelimiterAuto", resourceCulture);
             }
         }
         
@@ -97,6 +124,33 @@ namespace ExcelToSQL.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error generating SQL: .
+        /// </summary>
+        internal static string ErrorGeneratingSQL {
+            get {
+                return ResourceManager.GetString("ErrorGeneratingSQL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error loading file: .
+        /// </summary>
+        internal static string ErrorLoadingfile {
+            get {
+                return ResourceManager.GetString("ErrorLoadingfile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error saving file: .
+        /// </summary>
+        internal static string ErrorSavingFile {
+            get {
+                return ResourceManager.GetString("ErrorSavingFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Generate SQL.
         /// </summary>
         internal static string GenerateSQL {
@@ -111,6 +165,15 @@ namespace ExcelToSQL.Resources {
         internal static string Language {
             get {
                 return ResourceManager.GetString("Language", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No data loaded. Please upload or drag a file..
+        /// </summary>
+        internal static string NoDataLoadedError {
+            get {
+                return ResourceManager.GetString("NoDataLoadedError", resourceCulture);
             }
         }
         
@@ -151,11 +214,29 @@ namespace ExcelToSQL.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Save operation cancelled..
+        /// </summary>
+        internal static string SaveOperationCancelled {
+            get {
+                return ResourceManager.GetString("SaveOperationCancelled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Save Settings.
         /// </summary>
         internal static string SaveSettings {
             get {
                 return ResourceManager.GetString("SaveSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Save SQL File.
+        /// </summary>
+        internal static string SaveSQLFileTitle {
+            get {
+                return ResourceManager.GetString("SaveSQLFileTitle", resourceCulture);
             }
         }
         
@@ -174,6 +255,15 @@ namespace ExcelToSQL.Resources {
         internal static string SelectSheetTitle {
             get {
                 return ResourceManager.GetString("SelectSheetTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SQL file saved: .
+        /// </summary>
+        internal static string SQLFileSaved {
+            get {
+                return ResourceManager.GetString("SQLFileSaved", resourceCulture);
             }
         }
         
