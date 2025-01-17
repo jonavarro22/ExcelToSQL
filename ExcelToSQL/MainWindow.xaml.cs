@@ -120,6 +120,7 @@ namespace ExcelToSQL
 
                 if (filePath.EndsWith(".csv"))
                 {
+                    // CSV processing remains unchanged
                     string delimiter = DetectOrGetSelectedDelimiter(filePath);
 
                     if (string.IsNullOrEmpty(delimiter))
@@ -145,7 +146,17 @@ namespace ExcelToSQL
                     ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
                     using (var package = new ExcelPackage(new FileInfo(filePath)))
                     {
-                        var worksheet = package.Workbook.Worksheets[0];
+                        var sheetNames = package.Workbook.Worksheets.Select(ws => ws.Name).ToList();
+
+                        // Prompt the user to select a sheet if multiple exist
+                        string selectedSheet = SelectSheet(sheetNames);
+                        if (string.IsNullOrEmpty(selectedSheet))
+                        {
+                            MessageBox.Show("No sheet selected. Operation cancelled.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                            return;
+                        }
+
+                        var worksheet = package.Workbook.Worksheets[selectedSheet];
                         var dataTable = new DataTable();
 
                         for (int col = 1; col <= worksheet.Dimension.Columns; col++)
@@ -193,6 +204,44 @@ namespace ExcelToSQL
                 MessageBox.Show($"Error loading file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        /// <summary>
+        /// Prompts the user to select a sheet from the Excel file.
+        /// </summary>
+        /// <param name="sheetNames"></param>
+        /// <returns></returns>
+        private string SelectSheet(List<string> sheetNames)
+        {
+            var sheetSelectionWindow = new Window
+            {
+                Title = "Select a Sheet",
+                Width = 300,
+                Height = 200,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
+
+            var stackPanel = new StackPanel { Margin = new Thickness(10) };
+
+            var comboBox = new ComboBox { ItemsSource = sheetNames, Margin = new Thickness(0, 0, 0, 10) };
+            comboBox.SelectedIndex = 0;
+
+            var okButton = new Button { Content = "OK", Width = 80, HorizontalAlignment = HorizontalAlignment.Center };
+            okButton.Click += (s, e) => sheetSelectionWindow.DialogResult = true;
+
+            stackPanel.Children.Add(new TextBlock { Text = "Select a sheet to process:", Margin = new Thickness(0, 0, 0, 10) });
+            stackPanel.Children.Add(comboBox);
+            stackPanel.Children.Add(okButton);
+
+            sheetSelectionWindow.Content = stackPanel;
+
+            if (sheetSelectionWindow.ShowDialog() == true)
+            {
+                return comboBox.SelectedItem as string;
+            }
+
+            return null; // User cancelled
+        }
+
 
         /// <summary>
         /// Handles the infer column types button click.
