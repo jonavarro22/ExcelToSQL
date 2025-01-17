@@ -11,9 +11,9 @@ namespace ExcelToSQL
 {
     public partial class MainWindow : Window
     {
-        private const string ConfigFilePath = "C:\\ProgramData\\FloatyRock\\ExcelToSQL\\settings.json";
+        private const string ConfigFilePath = "C:\\ProgramData\\ExcelToSQL\\settings.json";
         private string selectedSQLType = "MSSQL"; // Default to MSSQL
-        private string CurrentFilePath; // To store the path of the loaded file
+        private bool ComponentsInitialized = false;
 
         private string DelimiterWarningText { get; set; }
         private string NoSheetSelectedText { get; set; }
@@ -30,11 +30,14 @@ namespace ExcelToSQL
         private string SaveOperationCancelledText { get; set; }
         private string CantLoadSettingsText { get; set; }
         private string SaveSQLFileTitle { get; set; }
+        private string InputFilePath { get; set; }
+        private string OutputFilePath { get; set; }
 
 
         public MainWindow()
         {
             InitializeComponent();
+            ComponentsInitialized = true;
             LoadSettings(); // Load saved settings on startup
             SetLocalizedText(); // Set default localized text
         }
@@ -44,7 +47,10 @@ namespace ExcelToSQL
         /// </summary>
         private void OperationComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            SaveSettings(); // Save the current selection whenever it changes
+            if (ComponentsInitialized)
+            {
+                SaveSettings(); // Save the current selection whenever it changes
+            }
         }
 
         /// <summary>
@@ -59,7 +65,10 @@ namespace ExcelToSQL
                 {
                     LocalizationManager.SetLanguage(selectedLanguage);
                     SetLocalizedText(); // Update UI with localized text
-                    SaveSettings(); // Save the selected language
+                    if (ComponentsInitialized)
+                    {
+                        SaveSettings(); // Save the selected language whenever it changes
+                    }
                 }
             }
         }
@@ -79,6 +88,10 @@ namespace ExcelToSQL
                 {
                     // Handle the case where Tag is null
                     selectedSQLType = string.Empty; // or some default value
+                }
+                if (ComponentsInitialized)
+                {
+                    SaveSettings(); // Save the selected language whenever it changes
                 }
             }
         }
@@ -111,16 +124,22 @@ namespace ExcelToSQL
         /// </summary>
         private void UploadFile_Click(object sender, RoutedEventArgs e)
         {
-            Microsoft.Win32.OpenFileDialog openFileDialog = new Microsoft.Win32.OpenFileDialog
+            var openFileDialog = new Microsoft.Win32.OpenFileDialog
             {
-                Filter = AllSupportedFilesText + " (*.xlsx, *.csv)|*.xlsx;*.csv|Excel (*.xlsx)|*.xlsx|CSV (*.csv)|*.csv"
+                Filter = AllSupportedFilesText + " (*.xlsx, *.csv)|*.xlsx;*.csv|Excel (*.xlsx)|*.xlsx|CSV (*.csv)|*.csv",
+                InitialDirectory = !string.IsNullOrEmpty(InputFilePath)
+                    ? Path.GetDirectoryName(InputFilePath)
+                    : Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) // Default to My Documents
             };
+
             if (openFileDialog.ShowDialog() == true)
             {
-                string filePath = openFileDialog.FileName;
-                LoadFile(filePath);
+                InputFilePath = openFileDialog.FileName; // Store the selected file's full path
+                SaveSettings(); // Save the updated InputFilePath
+                LoadFile(InputFilePath);
             }
         }
+
 
         /// <summary>
         /// Loads the selected file and displays its content in the DataGrid.
@@ -129,7 +148,6 @@ namespace ExcelToSQL
         {
             try
             {
-                CurrentFilePath = filePath; // Update the file path
 
                 if (filePath.EndsWith(".csv"))
                 {
@@ -516,18 +534,36 @@ namespace ExcelToSQL
 
             var table = ((DataView)DataPreviewGrid.ItemsSource).ToTable();
             bool isCreateTable = OperationComboBox.SelectedIndex == 0; // 0 = Create Table, 1 = Update Table
-            string fileName = Path.GetFileNameWithoutExtension(CurrentFilePath); // Assume CurrentFilePath stores the uploaded file's path
+            string fileName = Path.GetFileNameWithoutExtension(InputFilePath) ?? "GeneratedSQL"; // Use InputFilePath or default name
 
             try
             {
+                // Generate the SQL script
                 var sql = GenerateSQL(table, isCreateTable, fileName);
-                SaveSQLToFile(sql, fileName);
+
+                // Determine the save path
+                if (string.IsNullOrEmpty(OutputFilePath))
+                {
+                    // Default to My Documents if OutputFilePath is not set
+                    OutputFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), $"{fileName}.sql");
+                }
+                else if (!OutputFilePath.EndsWith(".sql", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Ensure the file name ends with .sql
+                    OutputFilePath = Path.Combine(OutputFilePath, $"{fileName}.sql");
+                }
+
+                // Save the SQL script
+                SaveSQLToFile(sql, OutputFilePath);
+                SaveSettings();
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ErrorGeneratingSQLText + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+
 
         /// <summary>
         /// Saves the generated SQL to a file. Prompts the user for a file name and location.
@@ -572,9 +608,9 @@ namespace ExcelToSQL
             {
                 try
                 {
+                    // Load settings from the configuration file
                     var settings = JsonSerializer.Deserialize<UserSettings>(File.ReadAllText(ConfigFilePath));
 
-                    // Restore ComboBox selections
                     OperationComboBox.SelectedIndex = settings.OperationIndex;
                     foreach (ComboBoxItem item in LanguageSelector.Items)
                     {
@@ -584,13 +620,61 @@ namespace ExcelToSQL
                             break;
                         }
                     }
+                    TargetSQLComboBox.SelectedIndex = settings.TargetSQLIndex;
+                    InputFilePath = settings.InputPath;
+                    OutputFilePath = settings.OutputPath;
                 }
-                catch
+                catch (Exception ex)
                 {
-                    MessageBox.Show(CantLoadSettingsText, "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show($"Error loading settings: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            else
+            {
+                try
+                {
+                    // Create and write default settings
+                    var defaultSettings = new UserSettings
+                    {
+                        InputPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                        OutputPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                        OperationIndex = 0, // Default to "Create Table" or your first operation
+                        LanguageCode = "en", // Default language
+                        TargetSQLIndex = 0 // Default SQL type index (e.g., MSSQL)
+                    };
+
+                    // Ensure the directory exists
+                    string directoryPath = Path.GetDirectoryName(ConfigFilePath);
+                    if (!Directory.Exists(directoryPath))
+                    {
+                        Directory.CreateDirectory(directoryPath);
+                    }
+
+                    // Write the default settings to the file
+                    File.WriteAllText(ConfigFilePath, JsonSerializer.Serialize(defaultSettings));
+                    MessageBox.Show("Default settings file created.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    // Apply the default settings
+                    InputFilePath = defaultSettings.InputPath;
+                    OutputFilePath = defaultSettings.OutputPath;
+                    OperationComboBox.SelectedIndex = defaultSettings.OperationIndex;
+                    TargetSQLComboBox.SelectedIndex = defaultSettings.TargetSQLIndex;
+                    foreach (ComboBoxItem item in LanguageSelector.Items)
+                    {
+                        if (item.Tag?.ToString() == defaultSettings.LanguageCode)
+                        {
+                            item.IsSelected = true;
+                            break;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error creating default settings: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
+
 
         /// <summary>
         /// Saves user settings to a configuration file.
@@ -600,17 +684,22 @@ namespace ExcelToSQL
             var settings = new UserSettings
             {
                 OperationIndex = OperationComboBox?.SelectedIndex ?? -1,
-                LanguageCode = ((ComboBoxItem)LanguageSelector?.SelectedItem)?.Tag?.ToString() ?? string.Empty
+                LanguageCode = ((ComboBoxItem)LanguageSelector?.SelectedItem)?.Tag?.ToString() ?? string.Empty,
+                TargetSQLIndex = TargetSQLComboBox?.SelectedIndex ?? -1,
+                InputPath = InputFilePath ?? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                OutputPath = OutputFilePath ?? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
             };
 
-            var directoryPath = Path.GetDirectoryName(ConfigFilePath);
-            if (!Directory.Exists(directoryPath))
+            try
             {
-                Directory.CreateDirectory(directoryPath);
+                File.WriteAllText(ConfigFilePath, JsonSerializer.Serialize(settings));
             }
-
-            File.WriteAllText(ConfigFilePath, JsonSerializer.Serialize(settings));
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error saving settings: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
+
 
         /// <summary>
         /// Sets localized text for all UI elements.
@@ -651,6 +740,10 @@ namespace ExcelToSQL
     public class UserSettings
     {
         public int OperationIndex { get; set; }
-        public required string LanguageCode { get; set; }
+        public string LanguageCode { get; set; }
+        public int TargetSQLIndex { get; set; }
+        public string InputPath { get; set; } = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        public string OutputPath { get; set; } = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
     }
+
 }
