@@ -281,36 +281,64 @@ namespace ExcelToSQL
         {
             var newTable = new DataTable();
 
-            // Infer column types and add columns to the new table
             foreach (DataColumn column in originalTable.Columns)
             {
-                var nonNullValues = originalTable.AsEnumerable()
-                    .Where(row => !row.IsNull(column))
-                    .Select(row => row[column]);
+                // Retrieve all non-null, trimmed string values from this column
+                var nonNullTrimmedValues = originalTable.AsEnumerable()
+                    .Where(row => !row.IsNull(column)
+                                  && !string.IsNullOrWhiteSpace(row[column].ToString()))
+                    .Select(row => row[column].ToString().Trim())
+                    .ToList();
 
                 Type columnType;
 
-                if (nonNullValues.All(value => int.TryParse(value.ToString(), out _)))
+                // If there are no actual (non-whitespace) values, default to string
+                if (!nonNullTrimmedValues.Any())
                 {
-                    columnType = typeof(int);
-                }
-                else if (nonNullValues.All(value => double.TryParse(value.ToString(), out _)))
-                {
-                    columnType = typeof(double);
-                }
-                else if (nonNullValues.All(value => DateTime.TryParse(value.ToString(), out _)))
-                {
-                    columnType = typeof(DateTime);
+                    columnType = typeof(string);
                 }
                 else
                 {
-                    columnType = typeof(string);
+                    // Check if ALL values are valid GUIDs
+                    bool allGuids = nonNullTrimmedValues.All(v => Guid.TryParse(v, out _));
+
+                    // Check if ALL values are valid DateTimes
+                    bool allDateTimes = nonNullTrimmedValues.All(v => DateTime.TryParse(v, out _));
+
+                    // Check if ALL values are valid integers
+                    bool allIntegers = nonNullTrimmedValues.All(v => int.TryParse(v, out _));
+
+                    // Check if ALL values are valid decimals (or doubles)
+                    // You can decide which numeric type makes more sense
+                    bool allDecimals = nonNullTrimmedValues.All(v => decimal.TryParse(v, out _));
+
+                    // Decide final type in whichever order you prefer
+                    if (allGuids)
+                    {
+                        columnType = typeof(Guid);
+                    }
+                    else if (allDateTimes)
+                    {
+                        columnType = typeof(DateTime);
+                    }
+                    else if (allIntegers)
+                    {
+                        columnType = typeof(int);
+                    }
+                    else if (allDecimals)
+                    {
+                        columnType = typeof(decimal);
+                    }
+                    else
+                    {
+                        columnType = typeof(string);
+                    }
                 }
 
                 newTable.Columns.Add(column.ColumnName, columnType);
             }
 
-            // Copy data to the new table
+            // Copy data
             foreach (DataRow row in originalTable.Rows)
             {
                 var newRow = newTable.NewRow();

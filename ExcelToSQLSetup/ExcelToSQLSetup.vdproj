@@ -19,6 +19,12 @@
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
+        "Entry"
+        {
+        "MsmKey" = "8:_C30159ADE0C945C5991729BA46D6FA08"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
     }
     "Configurations"
     {
@@ -37,6 +43,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
         "Release"
         {
@@ -53,6 +67,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
     }
     "Deployable"
@@ -84,6 +106,26 @@
         }
         "File"
         {
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_C30159ADE0C945C5991729BA46D6FA08"
+            {
+            "SourcePath" = "8:..\\..\\..\\..\\OneDrive\\Desktop\\icon.ico"
+            "TargetName" = "8:icon.ico"
+            "Tag" = "8:"
+            "Folder" = "8:_4AAD000088E040F5840711F064ADD50F"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
         }
         "FileType"
         {
@@ -169,7 +211,7 @@
         "Keywords" = "8:"
         "ARPCOMMENTS" = "8:"
         "ARPURLINFOABOUT" = "8:joaquinlab.com"
-        "ARPPRODUCTICON" = "8:"
+        "ARPPRODUCTICON" = "8:_C30159ADE0C945C5991729BA46D6FA08"
         "ARPIconIndex" = "3:0"
         "SearchPath" = "8:"
         "UseSystemSearchPath" = "11:TRUE"
@@ -283,7 +325,7 @@
             "Target" = "8:_06CC5192BB5A4AF0B0C466D5FF71289E"
             "Folder" = "8:_2A90C0E16413417D92E7AD0585877F87"
             "WorkingFolder" = "8:_4AAD000088E040F5840711F064ADD50F"
-            "Icon" = "8:"
+            "Icon" = "8:_C30159ADE0C945C5991729BA46D6FA08"
             "Feature" = "8:"
             }
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_D4738DF38FF34F4F8022004BF9A7CBA9"
@@ -297,7 +339,7 @@
             "Target" = "8:_06CC5192BB5A4AF0B0C466D5FF71289E"
             "Folder" = "8:_83DFA3BC60F544BA997F7794FD2593C8"
             "WorkingFolder" = "8:_4AAD000088E040F5840711F064ADD50F"
-            "Icon" = "8:"
+            "Icon" = "8:_C30159ADE0C945C5991729BA46D6FA08"
             "Feature" = "8:"
             }
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_F46B1B6B7A8948E398A2DD1CE19FF08F"
@@ -311,7 +353,7 @@
             "Target" = "8:_06CC5192BB5A4AF0B0C466D5FF71289E"
             "Folder" = "8:_7BE0769FA39F4EA09F7BADFE997CA417"
             "WorkingFolder" = "8:_4AAD000088E040F5840711F064ADD50F"
-            "Icon" = "8:"
+            "Icon" = "8:_C30159ADE0C945C5991729BA46D6FA08"
             "Feature" = "8:"
             }
         }
