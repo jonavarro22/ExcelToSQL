@@ -83,15 +83,10 @@ namespace ExcelToSQL
                 if (selectedItem.Tag != null)
                 {
                     selectedSQLType = selectedItem.Tag.ToString();
-                }
-                else
-                {
-                    // Handle the case where Tag is null
-                    selectedSQLType = string.Empty; // or some default value
-                }
-                if (ComponentsInitialized)
-                {
-                    SaveSettings(); // Save the selected language whenever it changes
+                    if (ComponentsInitialized)
+                    {
+                        SaveSettings(); // Save the selected language whenever it changes
+                    }
                 }
             }
         }
@@ -283,10 +278,12 @@ namespace ExcelToSQL
 
             foreach (DataColumn column in originalTable.Columns)
             {
-                // Retrieve all non-null, trimmed string values from this column
                 var nonNullTrimmedValues = originalTable.AsEnumerable()
-                    .Where(row => !row.IsNull(column)
-                                  && !string.IsNullOrWhiteSpace(row[column].ToString()))
+                    .Where(row =>
+                        !row.IsNull(column) &&
+                        !string.IsNullOrWhiteSpace(row[column].ToString()) &&
+                        !string.Equals(row[column].ToString().Trim(), "NULL", StringComparison.OrdinalIgnoreCase)
+                    )
                     .Select(row => row[column].ToString().Trim())
                     .ToList();
 
@@ -295,47 +292,49 @@ namespace ExcelToSQL
                 // If there are no actual (non-whitespace) values, default to string
                 if (!nonNullTrimmedValues.Any())
                 {
-                    columnType = typeof(string);
+                    columnType = typeof(int);
+                }
+                else if (nonNullTrimmedValues.All(v => Guid.TryParse(v, out _)))
+                {
+                    columnType = typeof(Guid);
+                }
+                else if (nonNullTrimmedValues.All(v => DateTime.TryParse(v, out _)))
+                {
+                    columnType = typeof(DateTime);
+                }
+                //else if (nonNullTrimmedValues.All(v => TimeSpan.TryParse(v, out _)))
+                //{
+                //    columnType = typeof(DateTime);
+                //}
+                else if (nonNullTrimmedValues.All(v => int.TryParse(v, out _)))
+                {
+                    columnType = typeof(int);
+                }
+                else if (nonNullTrimmedValues.All(v => decimal.TryParse(v, out _)))
+                {
+                    columnType = typeof(decimal);
+                }
+                else if (nonNullTrimmedValues.All(v => double.TryParse(v, out _)))
+                {
+                    columnType = typeof(double);
+                }
+                else if (nonNullTrimmedValues.All(v => bool.TryParse(v, out _)))
+                {
+                    columnType = typeof(bool);
+                }
+                else if (nonNullTrimmedValues.All(v => byte.TryParse(v, out _)))
+                {
+                    columnType = typeof(byte);
                 }
                 else
                 {
-                    // Check if ALL values are valid GUIDs
-                    bool allGuids = nonNullTrimmedValues.All(v => Guid.TryParse(v, out _));
-
-                    // Check if ALL values are valid DateTimes
-                    bool allDateTimes = nonNullTrimmedValues.All(v => DateTime.TryParse(v, out _));
-
-                    // Check if ALL values are valid integers
-                    bool allIntegers = nonNullTrimmedValues.All(v => int.TryParse(v, out _));
-
-                    // Check if ALL values are valid decimals (or doubles)
-                    // You can decide which numeric type makes more sense
-                    bool allDecimals = nonNullTrimmedValues.All(v => decimal.TryParse(v, out _));
-
-                    // Decide final type in whichever order you prefer
-                    if (allGuids)
-                    {
-                        columnType = typeof(Guid);
-                    }
-                    else if (allDateTimes)
-                    {
-                        columnType = typeof(DateTime);
-                    }
-                    else if (allIntegers)
-                    {
-                        columnType = typeof(int);
-                    }
-                    else if (allDecimals)
-                    {
-                        columnType = typeof(decimal);
-                    }
-                    else
-                    {
-                        columnType = typeof(string);
-                    }
+                    columnType = typeof(string);
                 }
 
-                newTable.Columns.Add(column.ColumnName, columnType);
+                // Create the column in the new table
+                DataColumn newColumn = newTable.Columns.Add(column.ColumnName, columnType);
+                // Now set AllowDBNull for that column
+                newColumn.AllowDBNull = true;  // or false, based on your requirements
             }
 
             // Copy data
@@ -344,7 +343,15 @@ namespace ExcelToSQL
                 var newRow = newTable.NewRow();
                 foreach (DataColumn column in originalTable.Columns)
                 {
-                    newRow[column.ColumnName] = row[column];
+                    // Remove the extra assignment that overwrote your attempt at DBNull
+                    if (row[column]?.ToString().Trim().Equals("NULL", StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        newRow[column.ColumnName] = DBNull.Value;
+                    }
+                    else
+                    {
+                        newRow[column.ColumnName] = row[column];
+                    }
                 }
                 newTable.Rows.Add(newRow);
             }
@@ -531,22 +538,81 @@ namespace ExcelToSQL
 
         private string GetSQLType(Type type)
         {
-            if (type == typeof(int))
-                return "INT";
-            if (type == typeof(double))
-                return "FLOAT";
-            if (type == typeof(DateTime))
-                return selectedSQLType == "MySQL" ? "DATETIME" : "TIMESTAMP";
-            if (type == typeof(Guid))
+            switch (type)
             {
-                if (selectedSQLType == "MSSQL")
-                    return "UNIQUEIDENTIFIER";
-                if (selectedSQLType == "MySQL")
-                    return "CHAR(36)";
-                if (selectedSQLType == "PostgreSQL")
-                    return "UUID";
+                case Type t when t == typeof(int):
+                    switch (selectedSQLType)
+                    {
+                        case "MSSQL": return "INT";
+                        case "MySQL": return "INT";
+                        case "PostgreSQL": return "INTEGER";
+                        default: return "INT";
+                    }
+
+                case Type t when t == typeof(double):
+                    switch (selectedSQLType)
+                    {
+                        case "MSSQL": return "FLOAT";
+                        case "MySQL": return "DOUBLE";
+                        case "PostgreSQL": return "DOUBLE PRECISION";
+                        default: return "FLOAT";
+                    }
+
+                case Type t when t == typeof(decimal):
+                    switch (selectedSQLType)
+                    {
+                        case "MSSQL": return "DECIMAL";
+                        case "MySQL": return "DECIMAL";
+                        case "PostgreSQL": return "DECIMAL";
+                        default: return "DECIMAL";
+                    }
+
+                case Type t when t == typeof(bool):
+                    switch (selectedSQLType)
+                    {
+                        case "MSSQL": return "BIT";
+                        case "MySQL": return "TINYINT(1)";
+                        case "PostgreSQL": return "BOOLEAN";
+                        default: return "BIT";
+                    }
+
+                case Type t when t == typeof(byte):
+                    switch (selectedSQLType)
+                    {
+                        case "MSSQL": return "TINYINT";
+                        case "MySQL": return "TINYINT UNSIGNED";
+                        case "PostgreSQL": return "SMALLINT";
+                        default: return "TINYINT";
+                    }
+
+                case Type t when t == typeof(DateTime):
+                    switch (selectedSQLType)
+                    {
+                        case "MSSQL": return "DATETIME2"; // DATETIME2 is generally recommended over DATETIME
+                        case "MySQL": return "DATETIME";
+                        case "PostgreSQL": return "TIMESTAMP WITHOUT TIME ZONE"; // You might also use TIMESTAMP WITH TIME ZONE
+                        default: return "TIMESTAMP";
+                    }
+
+                case Type t when t == typeof(Guid):
+                    switch (selectedSQLType)
+                    {
+                        case "MSSQL": return "UNIQUEIDENTIFIER";
+                        case "MySQL": return "CHAR(36)";
+                        case "PostgreSQL": return "UUID";
+                        default: return "NVARCHAR(MAX)";
+                    }
+
+                default:
+                    switch (selectedSQLType)
+                    {
+                        case "MSSQL": return "NVARCHAR(MAX)";
+                        case "MySQL": return "TEXT";
+                        case "PostgreSQL": return "TEXT";
+                        default:
+                            return "NVARCHAR(MAX)";
+                    }
             }
-            return selectedSQLType == "MySQL" ? "TEXT" : "NVARCHAR(MAX)";
         }
 
         /// <summary>
