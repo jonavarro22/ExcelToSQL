@@ -32,6 +32,8 @@ namespace ExcelToSQL
         private string SaveSQLFileTitle { get; set; }
         private string InputFilePath { get; set; }
         private string OutputFilePath { get; set; }
+        private string CurrentTableName { get; set; }
+
 
 
         public MainWindow()
@@ -143,12 +145,13 @@ namespace ExcelToSQL
         {
             try
             {
-
-                if (filePath.EndsWith(".csv"))
+                if (filePath.EndsWith(".csv", StringComparison.OrdinalIgnoreCase))
                 {
-                    // CSV processing remains unchanged
-                    string delimiter = DetectOrGetSelectedDelimiter(filePath);
+                    // For CSV, set table name to the file name (without extension)
+                    CurrentTableName = Path.GetFileNameWithoutExtension(filePath);
 
+                    // CSV processing remains the same
+                    string delimiter = DetectOrGetSelectedDelimiter(filePath);
                     if (string.IsNullOrEmpty(delimiter))
                     {
                         MessageBox.Show(DelimiterWarningText, "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -167,57 +170,52 @@ namespace ExcelToSQL
                         DataPreviewGrid.ItemsSource = inferredTable.DefaultView;
                     }
                 }
-                else if (filePath.EndsWith(".xlsx"))
+                else if (filePath.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
                 {
                     ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
                     using (var package = new ExcelPackage(new FileInfo(filePath)))
                     {
-                        var sheetNames = package.Workbook.Worksheets.Select(ws => ws.Name).ToList();
+                        var worksheetNames = package.Workbook.Worksheets.Select(ws => ws.Name).ToList();
 
-                        // Prompt the user to select a sheet if multiple exist
-                        string selectedSheet = SelectSheet(sheetNames);
-                        if (string.IsNullOrEmpty(selectedSheet))
+                        if (worksheetNames.Count == 0)
                         {
                             MessageBox.Show(NoSheetSelectedText, "Info", MessageBoxButton.OK, MessageBoxImage.Information);
                             return;
                         }
-
-                        var worksheet = package.Workbook.Worksheets[selectedSheet];
-                        var dataTable = new DataTable();
-
-                        for (int col = 1; col <= worksheet.Dimension.Columns; col++)
+                        else if (worksheetNames.Count == 1)
                         {
-                            string header = worksheet.Cells[1, col].Text;
-                            if (!string.IsNullOrWhiteSpace(header))
-                            {
-                                dataTable.Columns.Add(header);
-                            }
-                        }
+                            // Exactly one sheet -> don't prompt user
+                            string singleSheetName = worksheetNames[0];
 
-                        for (int row = 2; row <= worksheet.Dimension.Rows; row++)
+                            // According to your requirement:
+                            // "if it's a single sheet, use the file name for the table name"
+                            CurrentTableName = Path.GetFileNameWithoutExtension(filePath);
+
+                            // Load data from the single sheet
+                            var worksheet = package.Workbook.Worksheets[singleSheetName];
+                            var dataTable = ExtractDataFromWorksheet(worksheet);
+                            var inferredTable = InferColumnTypes(dataTable);
+                            DataPreviewGrid.ItemsSource = inferredTable.DefaultView;
+                        }
+                        else
                         {
-                            var newRow = dataTable.NewRow();
-                            bool hasData = false;
-
-                            for (int col = 1; col <= dataTable.Columns.Count; col++)
+                            // Multiple sheets -> prompt user to select one
+                            string selectedSheet = SelectSheet(worksheetNames);
+                            if (string.IsNullOrEmpty(selectedSheet))
                             {
-                                var cellValue = worksheet.Cells[row, col].Text;
-                                if (!string.IsNullOrWhiteSpace(cellValue))
-                                {
-                                    newRow[col - 1] = cellValue;
-                                    hasData = true;
-                                }
+                                MessageBox.Show(NoSheetSelectedText, "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                                return;
                             }
 
-                            if (hasData)
-                            {
-                                dataTable.Rows.Add(newRow);
-                            }
+                            // Use the SELECTED sheet name as the table name
+                            CurrentTableName = selectedSheet;
+
+                            // Load data from that sheet
+                            var worksheet = package.Workbook.Worksheets[selectedSheet];
+                            var dataTable = ExtractDataFromWorksheet(worksheet);
+                            var inferredTable = InferColumnTypes(dataTable);
+                            DataPreviewGrid.ItemsSource = inferredTable.DefaultView;
                         }
-
-                        RemoveEmptyColumns(dataTable);
-                        var inferredTable = InferColumnTypes(dataTable); // Infer column types
-                        DataPreviewGrid.ItemsSource = inferredTable.DefaultView;
                     }
                 }
                 else
@@ -230,6 +228,44 @@ namespace ExcelToSQL
                 MessageBox.Show(ErrorLoadingFileText + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        private DataTable ExtractDataFromWorksheet(ExcelWorksheet worksheet)
+        {
+            var dataTable = new DataTable();
+
+            // Assume first row is headers
+            for (int col = 1; col <= worksheet.Dimension.Columns; col++)
+            {
+                string header = worksheet.Cells[1, col].Text;
+                if (!string.IsNullOrWhiteSpace(header))
+                {
+                    dataTable.Columns.Add(header);
+                }
+            }
+
+            // Read data from row 2 onwards
+            for (int row = 2; row <= worksheet.Dimension.Rows; row++)
+            {
+                var newRow = dataTable.NewRow();
+                bool hasData = false;
+
+                for (int col = 1; col <= dataTable.Columns.Count; col++)
+                {
+                    var cellValue = worksheet.Cells[row, col].Text;
+                    if (!string.IsNullOrWhiteSpace(cellValue))
+                    {
+                        newRow[col - 1] = cellValue;
+                        hasData = true;
+                    }
+                }
+
+                if (hasData) dataTable.Rows.Add(newRow);
+            }
+
+            RemoveEmptyColumns(dataTable);
+            return dataTable;
+        }
+
 
         /// <summary>
         /// Prompts the user to select a sheet from the Excel file.
@@ -466,75 +502,121 @@ namespace ExcelToSQL
 
         /// <summary>
         /// Generates SQL based on the current settings and loaded data.
+        /// Splits the INSERT statements into batches of 500 rows to avoid large-statement issues.
         /// </summary>
-        private string GenerateSQL(DataTable table, bool isCreateTable, string tableName)
+        private string GenerateSQL(DataTable table, bool isCreateTable, string tableName, int batchSize = 500)
         {
             var sqlBuilder = new System.Text.StringBuilder();
 
+            // 1. CREATE TABLE (if necessary)
             if (isCreateTable)
             {
-                // CREATE TABLE Query
                 sqlBuilder.AppendLine($"CREATE TABLE {tableName} (");
-
                 foreach (DataColumn column in table.Columns)
                 {
                     string sqlType = GetSQLType(column.DataType);
                     sqlBuilder.AppendLine($"    {column.ColumnName} {sqlType},");
                 }
-
-                sqlBuilder.Length -= 3; // Remove the last comma
+                // Remove the trailing comma
+                if (table.Columns.Count > 0)
+                {
+                    sqlBuilder.Length -= 3;
+                }
                 sqlBuilder.AppendLine(");");
-
-                // Add a line break for readability
                 sqlBuilder.AppendLine();
             }
 
-            // INSERT INTO Query (included for both Create and Update modes)
-            sqlBuilder.AppendLine($"INSERT INTO {tableName} (");
+            // 2. INSERT statements in batches
+            int totalRows = table.Rows.Count;
+            int currentRow = 0;
 
-            foreach (DataColumn column in table.Columns)
+            // Keep inserting until we've handled all rows
+            while (currentRow < totalRows)
             {
-                sqlBuilder.AppendLine($"    {column.ColumnName},");
-            }
+                // Determine the end row in this batch
+                int endRow = Math.Min(currentRow + batchSize, totalRows);
 
-            sqlBuilder.Length -= 3; // Remove the last comma
-            sqlBuilder.AppendLine(") VALUES");
+                // Begin the INSERT statement
+                sqlBuilder.AppendLine($"INSERT INTO {tableName} (");
 
-            foreach (DataRow row in table.Rows)
-            {
-                sqlBuilder.Append("    (");
-
+                // List all columns
                 foreach (DataColumn column in table.Columns)
                 {
-                    if (column.DataType == typeof(string) || column.DataType == typeof(DateTime))
+                    sqlBuilder.AppendLine($"    {column.ColumnName},");
+                }
+                // Remove trailing comma
+                if (table.Columns.Count > 0)
+                {
+                    sqlBuilder.Length -= 3;
+                }
+                sqlBuilder.AppendLine(") VALUES");
+
+                // Append each row in this batch
+                for (int i = currentRow; i < endRow; i++)
+                {
+                    DataRow row = table.Rows[i];
+                    sqlBuilder.Append("    (");
+
+                    foreach (DataColumn column in table.Columns)
                     {
-                        sqlBuilder.Append($"'{row[column]?.ToString().Replace("'", "''")}',");
+                        // Format each value properly (quoted vs. numeric)
+                        sqlBuilder.Append(FormatValue(row[column], column.DataType));
+                        sqlBuilder.Append(",");
                     }
-                    else if (column.DataType == typeof(Guid) && string.IsNullOrWhiteSpace(row[column]?.ToString()))
-                    {
-                        // Generate GUID based on the selected SQL type
-                        if (selectedSQLType == "MSSQL")
-                            sqlBuilder.Append($"NEWID(),");
-                        else if (selectedSQLType == "MySQL")
-                            sqlBuilder.Append($"UUID(),");
-                        else if (selectedSQLType == "PostgreSQL")
-                            sqlBuilder.Append($"gen_random_uuid(),");
-                    }
-                    else
-                    {
-                        sqlBuilder.Append($"{row[column]?.ToString() ?? "NULL"},");
-                    }
+                    // Remove trailing comma
+                    sqlBuilder.Length -= 1;
+                    sqlBuilder.AppendLine("),");
                 }
 
-                sqlBuilder.Length -= 1; // Remove the last comma
-                sqlBuilder.AppendLine("),");
-            }
+                // Remove the extra comma after the last VALUES(...)
+                sqlBuilder.Length -= 3;
+                sqlBuilder.AppendLine(";");
+                sqlBuilder.AppendLine();
 
-            sqlBuilder.Length -= 3; // Remove the last comma
-            sqlBuilder.AppendLine(";");
+                // Move to the next batch
+                currentRow = endRow;
+            }
 
             return sqlBuilder.ToString();
         }
+
+        /// <summary>
+        /// Helper to return the SQL literal for a given cell value and type.
+        /// </summary>
+        private string FormatValue(object value, Type columnType)
+        {
+            // Handle NULL / empty
+            if (value == null || value == DBNull.Value)
+            {
+                return "NULL";
+            }
+
+            // Convert to string
+            string strValue = value.ToString();
+
+            // For empty strings, treat as NULL if you prefer
+            // if (string.IsNullOrWhiteSpace(strValue)) return "NULL";
+
+            // Escape single quotes
+            strValue = strValue.Replace("'", "''");
+
+            // Decide based on type
+            if (columnType == typeof(string) || columnType == typeof(DateTime))
+            {
+                return $"'{strValue}'";
+            }
+            else if (columnType == typeof(Guid))
+            {
+                // If empty or whitespace, maybe use a DB-specific function or NULL
+                if (string.IsNullOrWhiteSpace(strValue))
+                    return "NULL";
+
+                return $"'{strValue}'"; // or DB-specific, e.g., for MSSQL: 'CAST(' + strValue + ' AS UNIQUEIDENTIFIER)'
+            }
+            // else numeric, bool, etc.
+            return strValue;
+        }
+
 
         private string GetSQLType(Type type)
         {
@@ -626,30 +708,24 @@ namespace ExcelToSQL
                 return;
             }
 
+            // Convert DataView -> DataTable
             var table = ((DataView)DataPreviewGrid.ItemsSource).ToTable();
-            bool isCreateTable = OperationComboBox.SelectedIndex == 0; // 0 = Create Table, 1 = Update Table
-            string fileName = Path.GetFileNameWithoutExtension(InputFilePath) ?? "GeneratedSQL"; // Use InputFilePath or default name
 
+            // Are we creating or updating?
+            bool isCreateTable = OperationComboBox.SelectedIndex == 0; // 0 = Create, 1 = Update
+
+            // Build the SQL script
             try
             {
-                // Generate the SQL script
-                var sql = GenerateSQL(table, isCreateTable, fileName);
+                // Use the CurrentTableName as the table name
+                var sql = GenerateSQL(table, isCreateTable, CurrentTableName, batchSize: 500);
 
-                // Determine the save path
-                if (string.IsNullOrEmpty(OutputFilePath))
-                {
-                    // Default to My Documents if OutputFilePath is not set
-                    OutputFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), $"{fileName}.sql");
-                }
-                else if (!OutputFilePath.EndsWith(".sql", StringComparison.OrdinalIgnoreCase))
-                {
-                    // Ensure the file name ends with .sql
-                    OutputFilePath = Path.Combine(OutputFilePath, $"{fileName}.sql");
-                }
+                // For the default file name, also use CurrentTableName
+                // So if "CurrentTableName" is "MyCsvFile", the suggested file will be "MyCsvFile.sql"
+                var proposedFileName = CurrentTableName + ".sql";
 
-                // Save the SQL script
-                SaveSQLToFile(sql, OutputFilePath);
-                SaveSettings();
+                // Save it
+                SaveSQLToFile(sql, proposedFileName);
             }
             catch (Exception ex)
             {
@@ -836,8 +912,14 @@ namespace ExcelToSQL
         public int OperationIndex { get; set; }
         public string LanguageCode { get; set; }
         public int TargetSQLIndex { get; set; }
-        public string InputPath { get; set; } = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        public string OutputPath { get; set; } = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+        public string InputPath { get; set; }
+            = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+        // This can store the *full* file path that was used last time.
+        public string OutputPath { get; set; }
+            = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
     }
+
 
 }
