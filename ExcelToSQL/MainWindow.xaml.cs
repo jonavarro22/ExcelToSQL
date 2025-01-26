@@ -744,10 +744,11 @@ namespace ExcelToSQL
             {
                 Title = SaveSQLFileTitle,
                 Filter = "SQL (*.sql)|*.sql",
-                FileName = $"{defaultFileName}.sql", // Default file name
+                FileName = $"{defaultFileName}", // Default file name
                 DefaultExt = ".sql",                // Default file extension
-                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) // Default save location
-            };
+                InitialDirectory = OutputFilePath
+
+    };
 
             // Show the dialog and save if confirmed
             if (saveFileDialog.ShowDialog() == true)
@@ -756,6 +757,8 @@ namespace ExcelToSQL
                 {
                     File.WriteAllText(saveFileDialog.FileName, sql);
                     MessageBox.Show(SQLFileSavedText + saveFileDialog.FileName, "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    OutputFilePath = saveFileDialog.FileName;
+                    SaveSettings(); // Save the updated OutputFilePath
                 }
                 catch (Exception ex)
                 {
@@ -916,7 +919,6 @@ namespace ExcelToSQL
         public string InputPath { get; set; }
             = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
-        // This can store the *full* file path that was used last time.
         public string OutputPath { get; set; }
             = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
     }
